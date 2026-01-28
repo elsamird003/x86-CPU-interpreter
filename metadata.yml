@@ -1,0 +1,12 @@
+---
+:id: 339886594
+:submitters:
+- :name: Samuel Guzman Hernandez
+  :email: sguzmanherna@umass.edu
+:created_at: !ruby/object:ActiveSupport::TimeWithZone
+  utc: 2025-07-27 04:03:14.205151000 Z
+  zone: !ruby/object:ActiveSupport::TimeZone
+    name: America/Los_Angeles
+  time: 2025-07-26 21:03:14.205151000 Z
+:status: processed
+:score: 78.0
