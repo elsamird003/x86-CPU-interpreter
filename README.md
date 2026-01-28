@@ -1,0 +1,1 @@
+A low-level system interpreter built in C that emulates an x86-lite CPU architecture. The project involves manual management of the CPU state, including all 8 general-purpose registers. Key features include implementing a custom stack pointer logic using %ESP and %EBP, simulating memory allocation, and handling instruction control flow in memory safety checks.
