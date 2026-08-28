@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "interpreter.h"
 #include <math.h>
 #include <stdio.h>
@@ -26,9 +28,8 @@ void initialize_system(System *sys) {
 int reformat(char *line) {
   int idx, size = 0, flag = 0;
   int line_size = strlen(line);
-  for (idx = 0; idx < line_size && line[idx] == ' '; idx++)
-    ;
-  for (; idx < line_size; idx++) {
+  for (idx = 0; idx < line_size && line[idx] == ' '; idx++);
+  for (;idx < line_size; idx++) {
     if (line[idx] == '\n') break;
     if (line[idx] == ' ') {
       if (!flag) {
@@ -599,8 +600,9 @@ Please update program counter (EIP) in this function.
 */
 ExecResult execute_ret(System *sys) {
   int instruction_worker = sys->memory.data[sys->registers[ESP] / 4];
-  if (instruction_worker < 0 || instruction_worker >= sys->memory.num_instructions ){
-     return PC_ERROR;
+  if (instruction_worker < 0 ||
+      instruction_worker >= sys->memory.num_instructions * 4) {
+    return PC_ERROR;
   }
 
   sys->registers[ESP] += 4;
@@ -622,6 +624,87 @@ Please update program counter (EIP) for MOVL, ADDL, PUSHL, POPL, and CMPL in
 this function.
 */
 void execute_instructions(System *sys) {
-  char inst[256]; 
+  char inst[256];
+  char opcode[32], src[64], dst[64];
 
+  while (sys->registers[EIP] < sys->memory.num_instructions * 4) {
+    strcpy(inst, sys->memory.instruction[sys->registers[EIP] / 4]);
+
+    if (inst[0] == '.') {
+      sys->registers[EIP] += 4;
+      continue;
+    }
+
+    opcode[0] = src[0] = dst[0] = '\0';
+    if (sscanf(inst, "%31s", opcode) != 1) {
+      sys->registers[EIP] += 4;
+      continue;
+    }
+
+    if (strcmp(opcode, "END") == 0) {
+      break;
+    }
+
+    ExecResult result = SUCCESS;
+
+    if (sscanf(inst, "%*s %63[^,], %63s", src, dst) == 2) {
+      int len = (int)strlen(src);
+      while (len > 0 && src[len - 1] == ' ') {
+        src[--len] = '\0';
+      }
+      char *d = dst;
+      while (*d == ' ') {
+        d++;
+      }
+      if (d != dst) {
+        memmove(dst, d, strlen(d) + 1);
+      }
+
+      if (strcmp(opcode, "MOVL") == 0) {
+        result = execute_movl(sys, src, dst);
+      } else if (strcmp(opcode, "ADDL") == 0) {
+        result = execute_addl(sys, src, dst);
+      } else if (strcmp(opcode, "CMPL") == 0) {
+        result = execute_cmpl(sys, src, dst);
+      } else {
+        sys->registers[EIP] += 4;
+        continue;
+      }
+
+      if (result == SUCCESS) {
+        sys->registers[EIP] += 4;
+      }
+    } else if (sscanf(inst, "%*s %63s", dst) == 1) {
+      if (strcmp(opcode, "PUSHL") == 0) {
+        result = execute_push(sys, dst);
+        if (result == SUCCESS) {
+          sys->registers[EIP] += 4;
+        }
+      } else if (strcmp(opcode, "POPL") == 0) {
+        result = execute_pop(sys, dst);
+        if (result == SUCCESS) {
+          sys->registers[EIP] += 4;
+        }
+      } else if (strcmp(opcode, "CALL") == 0) {
+        result = execute_call(sys, dst);
+      } else if (strcmp(opcode, "JMP") == 0 || strcmp(opcode, "JE") == 0 ||
+                 strcmp(opcode, "JNE") == 0 || strcmp(opcode, "JL") == 0 ||
+                 strcmp(opcode, "JG") == 0) {
+        result = execute_jmp(sys, opcode, dst);
+      } else {
+        sys->registers[EIP] += 4;
+        continue;
+      }
+    } else if (strcmp(opcode, "RET") == 0) {
+      result = execute_ret(sys);
+    } else {
+      sys->registers[EIP] += 4;
+      continue;
+    }
+
+    if (result != SUCCESS) {
+      break;
+    }
+  }
 }
+

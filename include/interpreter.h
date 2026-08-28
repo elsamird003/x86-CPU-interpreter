@@ -27,7 +27,7 @@ typedef enum DataType { REG, MEM, CONST, UNKNOWN } DataType;
 
 /*
 Memory Type could be register, memory, or constant
-
+ 
 For Data in Register: reg will be one of the register and value will be -1
 
 For Data in Memory: reg will be one of the register that
@@ -37,6 +37,8 @@ that memory address
 For constant value: reg will be NOT_REG and value will be
 the constant value
 */
+
+
 typedef struct MemoryType {
   DataType type;
   RegisterName reg;
@@ -47,7 +49,7 @@ typedef enum ExecResult {
   SUCCESS,
   INSTRUCTION_ERROR,
   MEMORY_ERROR,
-  PC_ERROR
+  PC_ERROR, 
 } ExecResult;
 
 void initialize_system(System *sys);
