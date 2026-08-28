@@ -1,0 +1,20 @@
+MOVL $10, %EAX
+ADDL %EDX, %EAX
+CMPL %ECX, %EAX
+JG .skip_fail
+MOVL $99, %EAX
+.skip_fail
+MOVL $20, %EDX
+PUSHL %EAX
+PUSHL %EDX
+POPL %ECX
+POPL %EAX
+CALL .add_one
+MOVL $50, %EDX
+JMP .done
+.add_one
+ADDL $1, %EAX
+RET
+.done
+MOVL $30, %ECX
+END

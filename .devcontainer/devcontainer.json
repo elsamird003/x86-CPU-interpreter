@@ -1,0 +1,16 @@
+{
+	"name": "X86_Simulator_project",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"features": {
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools-extension-pack"
+			]
+		}
+	}
+}
+ 
