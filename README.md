@@ -1,4 +1,4 @@
-# x86-lite CPU Interpreter (C)
+# x86-CPU Interpreter (C)
 
 A low-level educational project that simulates a simplified x86-style CPU in software. The program loads assembly-like instructions from a text file and executes them by updating simulated CPU state: registers, instruction memory, data memory, and a stack.
 
